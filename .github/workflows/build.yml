@@ -1,0 +1,26 @@
+name: Build NDK (JNI) project
+
+on:
+  push:
+    branches: [ builds ]
+    paths:
+      - 'uploads/**'
+
+# Подстраховка на стороне GitHub к блокировке в самом боте (jni_lock.json):
+# даже если два запроса всё же попадут сюда почти одновременно, второй запуск
+# встанет в очередь и подождёт первый, а не будет собираться параллельно.
+concurrency:
+  group: jni-build
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - run: bash scripts/build_jni.sh
